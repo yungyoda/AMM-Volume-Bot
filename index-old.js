@@ -22,7 +22,6 @@ const TOKEN = process.env.TARGET_TOKEN;
 const WETH = process.env.WETH;
 const ROUTER = process.env.ROUTER;
 const USDT = process.env.USDT; 
-const PAIR_TOKEN = process.env.PAIR_TOKEN;
 const TX_DELAY_MIN = parseInt(process.env.TX_DELAY_MIN);
 const TX_DELAY_MAX = parseInt(process.env.TX_DELAY_MAX);
 const MIN_AMT = parseFloat(process.env.MIN_AMT);
@@ -196,7 +195,7 @@ const sellTokensCreateVolume = async (tries = 1.0) => {
     console.log(`Selling Try #${tries}...`);
 
     // prepare the variables needed for trade
-    const path = [TOKEN, PAIR_TOKEN, WETH];
+    const path = [TOKEN, USDT, WETH];
     const amt = await getAmt(path);
 
     if (amt === null) {
@@ -395,7 +394,7 @@ const buyTokensCreateVolume = async (tries = 1.0) => {
 
     // Prepare the variables needed for the trade
     const amountIn = ethers.parseEther(buyAmount.toFixed(18)); // Use 18 decimal places
-    const path = [WETH, PAIR_TOKEN, TOKEN];
+    const path = [WETH, USDT, TOKEN];
     console.log("amountIn: ", amountIn)
 
     // Execute the swap transaction and await result
