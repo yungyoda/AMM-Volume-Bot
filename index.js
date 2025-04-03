@@ -331,29 +331,43 @@ const swapExactTokensForETH = async (amountIn, path) => {
     const amountInFormatted = ethers.formatEther(amountIn);
     console.log("Swapping Tokens...");
     console.log("Amount In: " + amountInFormatted);
+    console.log("Path:", path);
 
+    // Get amounts out first to check if the trade is possible
     const amountsOut = await uniswapRouter.getAmountsOut(amountIn, path);
     const expectedAmt = amountsOut[amountsOut.length - 1];
     console.log("Expected Amount Out:", ethers.formatEther(expectedAmt));
 
     const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from now
 
-    // Calculate slippage
-    const slippage = 10n; // 10% slippage
+    // Calculate slippage (15%)
+    const slippage = 15n;
     const amountOutMin = expectedAmt - (expectedAmt / slippage);
 
     console.log("Amount Out Min: " + ethers.formatEther(amountOutMin));
 
-    const tx = await uniswapRouter.swapExactTokensForETH(
-      amountIn,
-      amountOutMin,
-      path,
-      WALLET_ADDRESS,
-      deadline,
-      { gasLimit: 300000 }
-    );
+    // Create the transaction object
+    const txData = {
+      from: WALLET_ADDRESS,
+      to: ROUTER,
+      gasLimit: ethers.toBigInt(300000),
+      data: uniswapRouter.interface.encodeFunctionData("swapExactTokensForETHSupportingFeeOnTransferTokens", [
+        amountIn,
+        amountOutMin,
+        path,
+        WALLET_ADDRESS,
+        deadline
+      ])
+    };
+
+    console.log("Transaction Data:", txData);
+
+    // Send the transaction
+    const tx = await wallet.sendTransaction(txData);
 
     console.log("Transaction sent. Waiting for confirmation...");
+    console.log("Transaction Hash:", tx.hash);
+    
     const receipt = await tx.wait();
     if (receipt && receipt.status === 1) {
       console.log("TOKEN SWAP SUCCESSFUL");
@@ -369,11 +383,17 @@ const swapExactTokensForETH = async (amountIn, path) => {
         transaction_url: t,
       };
     } else {
-      throw new Error("Transaction failed");
+      throw new Error("Transaction failed with status: " + receipt.status);
     }
   } catch (error) {
-    console.error("SwapExactTokensForETH failed", error);
-    throw error;  // Re-throw the error to be caught in the calling function
+    console.error("SwapExactTokensForETH failed", {
+      error: error.message,
+      code: error.code,
+      reason: error.reason || 'Unknown reason',
+      data: error.data,
+      transaction: error.transaction
+    });
+    throw error;
   }
 };
 
