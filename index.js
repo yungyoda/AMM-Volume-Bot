@@ -191,8 +191,8 @@ if (SEND_TELEGRAM_REPORT) {
 // AMM Volume Trading Function
 const sellTokensCreateVolume = async (tries = 1.0) => {
   try {
-    // limit to maximum 3 tries
-    if (tries > 3) return false;
+    // limit to maximum 5 tries
+    if (tries > 5) return false;
     console.log(`Selling Try #${tries}...`);
 
     // prepare the variables needed for trade
@@ -400,8 +400,8 @@ const swapExactTokensForETH = async (amountIn, path) => {
 // AMM Volume Trading Function
 const buyTokensCreateVolume = async (tries = 1.0) => {
   try {
-    // limit to maximum 3 tries
-    if (tries > 3) return false;
+    // limit to maximum 5 tries
+    if (tries > 5) return false;
     console.log(`Buying Try #${tries}...`);
 
     // Generate buy amount using Gaussian distribution
